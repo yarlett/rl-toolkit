@@ -5,7 +5,11 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn get(&self, i: usize, j: usize) -> usize {
+    pub fn get(&self, i: usize) -> usize {
+        self.board[i]
+    }
+
+    pub fn get_ij(&self, i: usize, j: usize) -> usize {
         self.board[self.ij_to_pos(i, j)]
     }
 
@@ -17,9 +21,13 @@ impl Board {
         self.j
     }
 
+    pub fn len(&self) -> usize {
+        self.board.len()
+    }
+
     pub fn longest_col(&self, i: usize, j: usize) -> usize {
         // Get piece at current location.
-        let p = self.get(i, j);
+        let p = self.get_ij(i, j);
         let mut n = 1;
         // Search up.
         let mut ii = i;
@@ -27,7 +35,7 @@ impl Board {
             if ii == 0 {
                 break;
             };
-            if self.get(ii - 1, j) == p {
+            if self.get_ij(ii - 1, j) == p {
                 n += 1;
                 ii -= 1;
             } else {
@@ -40,7 +48,7 @@ impl Board {
             if ii == (self.get_i() - 1) {
                 break;
             };
-            if self.get(ii + 1, j) == p {
+            if self.get_ij(ii + 1, j) == p {
                 n += 1;
                 ii += 1;
             } else {
@@ -52,7 +60,7 @@ impl Board {
 
     pub fn longest_diag_1(&self, i: usize, j: usize) -> usize {
         // Get piece at current location.
-        let p = self.get(i, j);
+        let p = self.get_ij(i, j);
         let mut n = 1;
         // Search --.
         let mut ii = i;
@@ -61,7 +69,7 @@ impl Board {
             if (ii == 0) | (jj == 0) {
                 break;
             };
-            if self.get(ii - 1, jj - 1) == p {
+            if self.get_ij(ii - 1, jj - 1) == p {
                 n += 1;
                 ii -= 1;
                 jj -= 1;
@@ -76,7 +84,7 @@ impl Board {
             if (ii == (self.get_i() - 1)) | (jj == (self.get_j() - 1)) {
                 break;
             };
-            if self.get(ii + 1, jj + 1) == p {
+            if self.get_ij(ii + 1, jj + 1) == p {
                 n += 1;
                 ii += 1;
                 jj += 1
@@ -89,7 +97,7 @@ impl Board {
 
     pub fn longest_diag_2(&self, i: usize, j: usize) -> usize {
         // Get piece at current location.
-        let p = self.get(i, j);
+        let p = self.get_ij(i, j);
         let mut n = 1;
         // Search +-.
         let mut ii = i;
@@ -98,7 +106,7 @@ impl Board {
             if (ii == (self.get_i() - 1)) | (jj == 0) {
                 break;
             };
-            if self.get(ii + 1, jj - 1) == p {
+            if self.get_ij(ii + 1, jj - 1) == p {
                 n += 1;
                 ii += 1;
                 jj -= 1;
@@ -113,7 +121,7 @@ impl Board {
             if (ii == 0) | (jj == (self.get_j() - 1)) {
                 break;
             };
-            if self.get(ii - 1, jj + 1) == p {
+            if self.get_ij(ii - 1, jj + 1) == p {
                 n += 1;
                 ii -= 1;
                 jj += 1
@@ -126,7 +134,7 @@ impl Board {
 
     pub fn longest_row(&self, i: usize, j: usize) -> usize {
         // Get piece at current location.
-        let p = self.get(i, j);
+        let p = self.get_ij(i, j);
         let mut n = 1;
         // Search left.
         let mut jj = j;
@@ -134,7 +142,7 @@ impl Board {
             if jj == 0 {
                 break;
             };
-            if self.get(i, jj - 1) == p {
+            if self.get_ij(i, jj - 1) == p {
                 n += 1;
                 jj -= 1;
             } else {
@@ -147,7 +155,7 @@ impl Board {
             if jj == (self.get_j() - 1) {
                 break;
             };
-            if self.get(i, jj + 1) == p {
+            if self.get_ij(i, jj + 1) == p {
                 n += 1;
                 jj += 1;
             } else {
@@ -165,7 +173,7 @@ impl Board {
         }
     }
 
-    pub fn put(&mut self, i: usize, j: usize, p: usize) {
+    pub fn put_ij(&mut self, i: usize, j: usize, p: usize) {
         let pos = self.ij_to_pos(i, j);
         self.board[pos] = p;
     }
@@ -174,7 +182,7 @@ impl Board {
         let mut s = String::new();
         for ii in 0..self.i {
             for jj in 0..self.j {
-                s.push_str(&format!("{}", self.get(ii, jj)));
+                s.push_str(&format!("{}", self.get_ij(ii, jj)));
             }
             s.push_str("\n");
         }
