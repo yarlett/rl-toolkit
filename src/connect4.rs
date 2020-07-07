@@ -1,27 +1,39 @@
 extern crate test;
-use crate::board;
-
-use rand::seq::SliceRandom;
+use crate::board::Board;
+use crate::game::Game;
 
 pub struct Connect4 {
-    board: board::Board,
+    board: Board,
     player: usize,
 }
 
 impl Connect4 {
-    pub fn coded_action(&self) -> Vec<f32> {
-        vec![0f32; self.board.get_j()]
-    }
-
-    pub fn coded_state(&self) -> Vec<f32> {
-        let mut vec = vec![0f32; self.board.len()];
-        for i in 0..self.board.len() {
-            vec[i] = self.board.get(i) as f32
+    pub fn new() -> Connect4 {
+        Connect4 {
+            board: Board::new(6, 7),
+            player: 1,
         }
-        vec
     }
 
-    pub fn get_moves(&self) -> Vec<usize> {
+    pub fn player(&self) -> usize {
+        self.player
+    }
+
+    pub fn to_string(&self) -> String {
+        self.board.to_string()
+    }
+
+    fn switch_players(&mut self) {
+        if self.player == 1 {
+            self.player = 2
+        } else {
+            self.player = 1
+        };
+    }
+}
+
+impl Game for Connect4 {
+    fn get_moves(&self) -> Vec<usize> {
         let mut js = Vec::new();
         for j in 0..self.board.get_j() {
             if self.board.get_ij(0, j) == 0 {
@@ -31,41 +43,19 @@ impl Connect4 {
         js
     }
 
-    // Performs Monte Carlo Tree Search (MCTS) startwing with a fresh game, under a random policy, until the game terminates.
-    pub fn mcts(&mut self) -> Vec<(Vec<f32>, Vec<f32>)> {
-        let mut data = Vec::new();
-        self.reset();
-        // Make move until game is finished.
-        loop {
-            // Pick a move to play.
-            let moves = self.get_moves();
-            if moves.len() == 0 {
-                break;
-            }
-            let mv = moves.choose(&mut rand::thread_rng()).unwrap();
-            // Make the move.
-            let (i, j) = self.play(*mv);
-            // Update states_actions.
-            let s = self.coded_state();
-            let mut a = self.coded_action();
-            a[*mv] = 1.0;
-            data.push((s, a));
-            //
-            if self.winning_point(i, j) {
-                break;
-            }
-        }
-        data
+    fn coded_action(&self) -> Vec<f32> {
+        vec![0f32; self.board.get_j()]
     }
 
-    pub fn new() -> Connect4 {
-        Connect4 {
-            board: board::Board::new(6, 7),
-            player: 1,
+    fn coded_state(&self) -> Vec<f32> {
+        let mut vec = vec![0f32; self.board.len()];
+        for i in 0..self.board.len() {
+            vec[i] = self.board.get(i) as f32
         }
+        vec
     }
 
-    pub fn play(&mut self, j: usize) -> (usize, usize) {
+    fn play(&mut self, j: usize) -> (usize, usize) {
         // Find the lowest empty point in the column.
         let mut i = 0;
         loop {
@@ -82,17 +72,13 @@ impl Connect4 {
         (i, j)
     }
 
-    pub fn player(&self) -> usize {
-        self.player
-    }
-
-    pub fn reset(&mut self) {
+    fn reset(&mut self) {
         self.board.reset();
         self.player = 1;
     }
 
     // Indicates whether specified point is part of a winning 4.
-    pub fn winning_point(&self, i: usize, j: usize) -> bool {
+    fn winning_point(&self, i: usize, j: usize) -> bool {
         if self.board.longest_col(i, j) >= 4 {
             return true;
         }
@@ -106,18 +92,6 @@ impl Connect4 {
             return true;
         }
         false
-    }
-
-    pub fn to_string(&self) -> String {
-        self.board.to_string()
-    }
-
-    fn switch_players(&mut self) {
-        if self.player == 1 {
-            self.player = 2
-        } else {
-            self.player = 1
-        };
     }
 }
 

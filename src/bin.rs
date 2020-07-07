@@ -1,4 +1,5 @@
 use rltoolkit::connect4::Connect4;
+use rltoolkit::game::Game;
 
 fn main() {
     let mut c4 = Connect4::new();
@@ -10,8 +11,3 @@ fn main() {
         }
     }
 }
-//     // Derive the value vectors for the game by back-propagating value of final state to start of game.
-//     for (s, a) in &states_actions {
-//         println!("{:?} {:?}", s, a);
-//     }
-// }
