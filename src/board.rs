@@ -178,6 +178,12 @@ impl Board {
         self.board[pos] = p;
     }
 
+    pub fn reset(&mut self) {
+        for i in 0..self.board.len() {
+            self.board[i] = 0;
+        }
+    }
+
     pub fn to_string(&self) -> String {
         let mut s = String::new();
         for ii in 0..self.i {
