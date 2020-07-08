@@ -30,10 +30,52 @@ impl Connect4 {
             self.player = 1
         };
     }
+
+    // Indicates whether specified point is part of a winning 4.
+    fn winning_point(&self, i: usize, j: usize) -> bool {
+        if self.board.longest_col(i, j) >= 4 {
+            return true;
+        }
+        if self.board.longest_diag_1(i, j) >= 4 {
+            return true;
+        }
+        if self.board.longest_diag_2(i, j) >= 4 {
+            return true;
+        }
+        if self.board.longest_row(i, j) >= 4 {
+            return true;
+        }
+        false
+    }
 }
 
 impl Game for Connect4 {
-    fn get_moves(&self) -> Vec<usize> {
+    type Action = usize;
+    type Reward = f32;
+
+    fn act(&mut self, j: &Self::Action) -> Option<Self::Reward> {
+        // Find the lowest empty point in the column.
+        let mut i = 0;
+        loop {
+            if (self.board.get_ij(i, *j) == 0)
+                & ((i == (self.board.get_i() - 1)) || (self.board.get_ij(i + 1, *j) != 0))
+            {
+                break;
+            }
+            i += 1;
+        }
+        // Put the current player's piece at this location and switch players.
+        self.board.put_ij(i, *j, self.player);
+        self.switch_players();
+        // Determine reward.
+        if self.winning_point(i, *j) {
+            return Some(1.0);
+        } else {
+            return None;
+        }
+    }
+
+    fn get_actions(&self) -> Vec<Self::Action> {
         let mut js = Vec::new();
         for j in 0..self.board.get_j() {
             if self.board.get_ij(0, j) == 0 {
@@ -55,43 +97,9 @@ impl Game for Connect4 {
         vec
     }
 
-    fn play(&mut self, j: usize) -> (usize, usize) {
-        // Find the lowest empty point in the column.
-        let mut i = 0;
-        loop {
-            if (self.board.get_ij(i, j) == 0)
-                & ((i == (self.board.get_i() - 1)) || (self.board.get_ij(i + 1, j) != 0))
-            {
-                break;
-            }
-            i += 1;
-        }
-        // Put the current player's piece at this location and switch players.
-        self.board.put_ij(i, j, self.player);
-        self.switch_players();
-        (i, j)
-    }
-
     fn reset(&mut self) {
         self.board.reset();
         self.player = 1;
-    }
-
-    // Indicates whether specified point is part of a winning 4.
-    fn winning_point(&self, i: usize, j: usize) -> bool {
-        if self.board.longest_col(i, j) >= 4 {
-            return true;
-        }
-        if self.board.longest_diag_1(i, j) >= 4 {
-            return true;
-        }
-        if self.board.longest_diag_2(i, j) >= 4 {
-            return true;
-        }
-        if self.board.longest_row(i, j) >= 4 {
-            return true;
-        }
-        false
     }
 }
 

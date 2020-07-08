@@ -1,37 +1,44 @@
 use rand::seq::SliceRandom;
 
+// Making this trait generic.
+// A: Action
+// S: State
+
 pub trait Game {
-    fn get_moves(&self) -> Vec<usize>;
+    type Action;
+    type Reward;
+
+    fn act(&mut self, _: &Self::Action) -> Option<Self::Reward>;
+    fn get_actions(&self) -> Vec<Self::Action>;
     fn coded_state(&self) -> Vec<f32>;
     fn coded_action(&self) -> Vec<f32>;
-    // fn new() -> Self;
-    fn play(&mut self, _: usize) -> (usize, usize);
     fn reset(&mut self);
-    fn winning_point(&self, _: usize, _: usize) -> bool;
+    // fn winning_point(&self, _: usize, _: usize) -> bool;
 
     // Starts a fresh game and performs Monte Carlo Tree Search (MCTS) under a random policy until the game terminates.
     fn mcts(&mut self) -> Vec<(Vec<f32>, Vec<f32>)> {
         self.reset();
         // Make move until game is finished.
-        let mut data = Vec::new();
+        let data = Vec::new();
         loop {
-            // Pick a move to play.
-            let moves = self.get_moves();
-            if moves.len() == 0 {
+            // Get valid actions and pick one randomly.
+            let actions = self.get_actions();
+            if actions.len() == 0 {
                 break;
             }
-            let mv = moves.choose(&mut rand::thread_rng()).unwrap();
-            // Make the move.
-            let (i, j) = self.play(*mv);
-            // Update states_actions.
-            let s = self.coded_state();
-            let mut a = self.coded_action();
-            a[*mv] = 1.0;
-            data.push((s, a));
-            //
-            if self.winning_point(i, j) {
-                break;
-            }
+            let action = actions.choose(&mut rand::thread_rng()).unwrap();
+            // Take the action and get the reward.
+            let _reward = self.act(action);
+
+            // // Update states_actions.
+            // let s = self.coded_state();
+            // let a = self.coded_action();
+            // // a[*action] = 1.0;
+            // data.push((s, a));
+            // //
+            // if self.winning_point(i, j) {
+            //     break;
+            // }
         }
         data
     }
