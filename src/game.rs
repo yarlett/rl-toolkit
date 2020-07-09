@@ -1,50 +1,42 @@
 use rand::seq::SliceRandom;
 
-// Making this trait generic.
-// A: Action
-// S: State
-
 pub trait Game {
-    type Action;
+    type Action: Clone;
     type Reward;
+    type State;
 
-    fn act(&mut self, _: &Self::Action) -> Option<Self::Reward>;
-    fn get_actions(&self) -> Vec<Self::Action>;
-    fn coded_state(&self) -> Vec<f32>;
-    fn coded_action(&self) -> Vec<f32>;
+    // Apply action to update state and returns optional reward.
+    fn act(&mut self, _: Self::Action) -> Option<Self::Reward>;
+    // Get actions that can be taken given the current state.
+    fn get_actions(&self) -> Option<Vec<Self::Action>>;
+    fn get_state(&self) -> Self::State;
+    // Resets state to starting condition.
     fn reset(&mut self);
-    // fn winning_point(&self, _: usize, _: usize) -> bool;
 
     // Starts a fresh game and performs Monte Carlo Tree Search (MCTS) under a random policy until the game terminates.
-    fn mcts(&mut self) -> Vec<(Vec<f32>, Vec<f32>)> {
+    fn simulate(&mut self) -> Vec<(Self::State, Self::Action, Option<Self::Reward>)> {
+        // Reset state.
         self.reset();
-        // Make move until game is finished.
-        let data = Vec::new();
+        // Collect (S, A, R) triples by making random moves until game is finished.
+        let mut data = Vec::new();
         loop {
-            // Get valid actions and pick one randomly.
+            // Get state.
+            let state = self.get_state();
+            // Get valid actions.
             let actions = self.get_actions();
-            if actions.len() == 0 {
-                break;
+            // Pick an action randomly.
+            match actions {
+                None => break,
+                Some(actions_inner) => {
+                    let action = actions_inner.choose(&mut rand::thread_rng()).unwrap();
+                    let reward = self.act(action.to_owned());
+                    data.push((state, action.to_owned(), reward));
+                }
             }
-            let action = actions.choose(&mut rand::thread_rng()).unwrap();
-            // Take the action and get the reward.
-            let _reward = self.act(action);
-
-            // // Update states_actions.
-            // let s = self.coded_state();
-            // let a = self.coded_action();
-            // // a[*action] = 1.0;
-            // data.push((s, a));
-            // //
-            // if self.winning_point(i, j) {
-            //     break;
-            // }
         }
+        // Backpropagate objective rewards back to the start of the game.
+
+        // Return data.
         data
     }
-    //     // Derive the value vectors for the game by back-propagating value of final state to start of game.
-    //     for (s, a) in &states_actions {
-    //         println!("{:?} {:?}", s, a);
-    //     }
-    // }
 }

@@ -7,7 +7,7 @@ fn main() {
         // Initialize game and.
         for _ in 0..100 {
             c4.reset();
-            let _game = c4.mcts();
+            let _game = c4.simulate();
         }
     }
 }

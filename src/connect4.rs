@@ -2,6 +2,7 @@ extern crate test;
 use crate::board::Board;
 use crate::game::Game;
 
+#[derive(Clone)]
 pub struct Connect4 {
     board: Board,
     player: usize,
@@ -52,50 +53,58 @@ impl Connect4 {
 impl Game for Connect4 {
     type Action = usize;
     type Reward = f32;
+    type State = (Vec<usize>, usize);
 
-    fn act(&mut self, j: &Self::Action) -> Option<Self::Reward> {
+    fn act(&mut self, j: Self::Action) -> Option<Self::Reward> {
         // Find the lowest empty point in the column.
         let mut i = 0;
         loop {
-            if (self.board.get_ij(i, *j) == 0)
-                & ((i == (self.board.get_i() - 1)) || (self.board.get_ij(i + 1, *j) != 0))
+            if (self.board.get_ij(i, j) == 0)
+                & ((i == (self.board.get_i() - 1)) || (self.board.get_ij(i + 1, j) != 0))
             {
                 break;
             }
             i += 1;
         }
         // Put the current player's piece at this location and switch players.
-        self.board.put_ij(i, *j, self.player);
+        self.board.put_ij(i, j, self.player);
         self.switch_players();
         // Determine reward.
-        if self.winning_point(i, *j) {
+        if self.winning_point(i, j) {
             return Some(1.0);
         } else {
             return None;
         }
     }
 
-    fn get_actions(&self) -> Vec<Self::Action> {
+    fn get_actions(&self) -> Option<Vec<Self::Action>> {
         let mut js = Vec::new();
         for j in 0..self.board.get_j() {
             if self.board.get_ij(0, j) == 0 {
                 js.push(j);
             }
         }
-        js
-    }
-
-    fn coded_action(&self) -> Vec<f32> {
-        vec![0f32; self.board.get_j()]
-    }
-
-    fn coded_state(&self) -> Vec<f32> {
-        let mut vec = vec![0f32; self.board.len()];
-        for i in 0..self.board.len() {
-            vec[i] = self.board.get(i) as f32
+        match js.len() {
+            0 => None,
+            _ => Some(js),
         }
-        vec
     }
+
+    fn get_state(&self) -> Self::State {
+        (self.board.get_board(), self.player)
+    }
+
+    // fn coded_action(&self) -> Vec<f32> {
+    //     vec![0f32; self.board.get_j()]
+    // }
+    //
+    // fn coded_state(&self) -> Vec<f32> {
+    //     let mut vec = vec![0f32; self.board.len()];
+    //     for i in 0..self.board.len() {
+    //         vec[i] = self.board.get(i) as f32
+    //     }
+    //     vec
+    // }
 
     fn reset(&mut self) {
         self.board.reset();
@@ -114,8 +123,8 @@ mod tests {
     }
 
     #[bench]
-    fn mcts(b: &mut Bencher) {
+    fn simulate(b: &mut Bencher) {
         let mut game = Connect4::new();
-        b.iter(|| game.mcts());
+        b.iter(|| game.simulate());
     }
 }

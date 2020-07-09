@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Board {
     board: Vec<usize>,
     i: usize,
@@ -7,6 +8,10 @@ pub struct Board {
 impl Board {
     pub fn get(&self, i: usize) -> usize {
         self.board[i]
+    }
+
+    pub fn get_board(&self) -> Vec<usize> {
+        self.board.clone()
     }
 
     pub fn get_ij(&self, i: usize, j: usize) -> usize {
