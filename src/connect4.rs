@@ -51,47 +51,68 @@ impl Connect4 {
 }
 
 impl Game for Connect4 {
-    type Action = usize;
-    type Reward = f32;
-    type State = (Vec<usize>, usize);
+    type Action = (usize, usize);  // (player, action)
+    type Reward = (usize, f32);    // (player, reward)
+    type State = Vec<usize>;       // board
 
-    fn act(&mut self, j: Self::Action) -> Option<Self::Reward> {
+    fn act(&mut self, action: Self::Action) -> Option<Self::Reward> {
+        let (player, column) = action;
         // Find the lowest empty point in the column.
         let mut i = 0;
         loop {
-            if (self.board.get_ij(i, j) == 0)
-                & ((i == (self.board.get_i() - 1)) || (self.board.get_ij(i + 1, j) != 0))
+            if (self.board.get_ij(i, column) == 0)
+                & ((i == (self.board.get_i() - 1)) || (self.board.get_ij(i + 1, column) != 0))
             {
                 break;
             }
             i += 1;
         }
         // Put the current player's piece at this location and switch players.
-        self.board.put_ij(i, j, self.player);
+        self.board.put_ij(i, column, player);
         self.switch_players();
         // Determine reward.
-        if self.winning_point(i, j) {
-            return Some(1.0);
+        if self.winning_point(i, column) {
+            return Some((player, 1.0));
         } else {
             return None;
         }
     }
 
     fn get_actions(&self) -> Option<Vec<Self::Action>> {
-        let mut js = Vec::new();
-        for j in 0..self.board.get_j() {
-            if self.board.get_ij(0, j) == 0 {
-                js.push(j);
+        let mut actions = Vec::new();
+        let cols = self.board.get_j();
+        let rows = self.board.get_i();
+        // Iterate over columns.
+        for col in 0..cols {
+            // Find the row of the highest piece in the column.
+            let mut row = 0;
+            loop {
+                if self.board.get_ij(row, col) != 0 {
+                    break;
+                }
+                row += 1;
+                if row >= rows {
+                    break;
+                }
+            }
+            // If the highest piece in the column is part of a winning position then no actions are possible.
+            if (row < rows) {
+                if self.winning_point(row, col) { return None; }
+            }
+            // If the row of the highest piece is > 0 then there's room to move in the row above.
+            if (row > 0) {
+                actions.push((self.player, col));
             }
         }
-        match js.len() {
+        // Return available actions if any.
+        match actions.len() {
             0 => None,
-            _ => Some(js),
+            _ => Some(actions),
         }
     }
 
     fn get_state(&self) -> Self::State {
-        (self.board.get_board(), self.player)
+        self.board.get_board()
     }
 
     // fn coded_action(&self) -> Vec<f32> {
@@ -118,12 +139,16 @@ mod tests {
     use test::Bencher;
 
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn simulate_test() {
+        let mut game = Connect4::new();
+        let data = game.simulate();
+        for d in &data {
+            println!("{:?}", d);
+        }
     }
 
     #[bench]
-    fn simulate(b: &mut Bencher) {
+    fn simulate_bench(b: &mut Bencher) {
         let mut game = Connect4::new();
         b.iter(|| game.simulate());
     }

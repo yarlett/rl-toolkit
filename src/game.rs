@@ -7,8 +7,9 @@ pub trait Game {
 
     // Apply action to update state and returns optional reward.
     fn act(&mut self, _: Self::Action) -> Option<Self::Reward>;
-    // Get actions that can be taken given the current state.
+    // Get actions that can be taken given the current state (returns None if no actions are possible and the game is finished).
     fn get_actions(&self) -> Option<Vec<Self::Action>>;
+    // Returns the current state.
     fn get_state(&self) -> Self::State;
     // Resets state to starting condition.
     fn reset(&mut self);
