@@ -80,7 +80,7 @@ impl Game for Connect4 {
         rewards
     }
 
-    fn get_actions(&self) -> Option<Vec<Self::Action>> {
+    fn get_actions(&self) -> Vec<Self::Action> {
         let mut actions = Vec::new();
         let cols = self.board.get_j();
         let rows = self.board.get_i();
@@ -100,7 +100,7 @@ impl Game for Connect4 {
             // If the highest piece in the column is part of a winning position then no actions are possible.
             if row < rows {
                 if self.winning_point(row, col) {
-                    return None;
+                    return actions;
                 }
             }
             // If the row of the highest piece is > 0 then there's room to move in the row above.
@@ -109,10 +109,7 @@ impl Game for Connect4 {
             }
         }
         // Return available actions if any.
-        match actions.len() {
-            0 => None,
-            _ => Some(actions),
-        }
+        actions
     }
 
     fn get_state(&self) -> Self::State {

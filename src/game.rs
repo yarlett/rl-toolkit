@@ -8,7 +8,7 @@ pub trait Game {
     // Apply action to update state and returns optional reward.
     fn act(&mut self, _: Self::Action) -> Vec<Self::Reward>;
     // Get actions that can be taken given the current state (returns None if no actions are possible and the game is finished).
-    fn get_actions(&self) -> Option<Vec<Self::Action>>;
+    fn get_actions(&self) -> Vec<Self::Action>;
     // Returns the current state.
     fn get_state(&self) -> Self::State;
     // Resets state to starting condition.
@@ -26,14 +26,12 @@ pub trait Game {
             // Get valid actions.
             let actions = self.get_actions();
             // Pick an action randomly.
-            match actions {
-                None => break,
-                Some(actions_inner) => {
-                    let action = actions_inner.choose(&mut rand::thread_rng()).unwrap();
-                    let reward = self.act(action.to_owned());
-                    data.push((state, action.to_owned(), reward));
-                }
-            }
+            if actions.len() == 0 {
+                break;
+            };
+            let action = actions.choose(&mut rand::thread_rng()).unwrap();
+            let reward = self.act(action.to_owned());
+            data.push((state, action.to_owned(), reward));
         }
         // Backpropagate objective rewards back to the start of the game.
 
