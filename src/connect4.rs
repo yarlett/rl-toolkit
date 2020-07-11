@@ -25,15 +25,18 @@ impl Connect4 {
     }
 
     fn switch_players(&mut self) {
-        if self.player == 1 {
-            self.player = 2
-        } else {
-            self.player = 1
+        self.player += 1;
+        if self.player == 3 {
+            self.player = 1;
         };
     }
 
     // Indicates whether specified point is part of a winning 4.
     fn winning_point(&self, i: usize, j: usize) -> bool {
+        if self.board.get_ij(i, j) == 0 {
+            return false;
+        };
+
         if self.board.longest_col(i, j) >= 4 {
             return true;
         }
@@ -51,7 +54,7 @@ impl Connect4 {
 }
 
 impl Game for Connect4 {
-    type Action = (usize, usize); // (player, action)
+    type Action = (usize, usize); // (player, column)
     type Reward = (usize, f32); // (player, reward)
     type State = Vec<usize>; // board
 
@@ -82,30 +85,20 @@ impl Game for Connect4 {
 
     fn get_actions(&self) -> Vec<Self::Action> {
         let mut actions = Vec::new();
-        let cols = self.board.get_j();
-        let rows = self.board.get_i();
-        // Iterate over columns.
-        for col in 0..cols {
-            // Find the row of the highest piece in the column.
-            let mut row = 0;
-            loop {
-                if self.board.get_ij(row, col) != 0 {
-                    break;
-                }
-                row += 1;
-                if row >= rows {
-                    break;
-                }
-            }
-            // If the highest piece in the column is part of a winning position then no actions are possible.
-            if row < rows {
-                if self.winning_point(row, col) {
+        let ni = self.board.get_i();
+        let nj = self.board.get_j();
+        // If any point is a winning point then return no actions because game is finished.
+        for i in 0..ni {
+            for j in 0..nj {
+                if self.winning_point(i, j) {
                     return actions;
-                }
+                };
             }
-            // If the row of the highest piece is > 0 then there's room to move in the row above.
-            if row > 0 {
-                actions.push((self.player, col));
+        }
+        // Iterate over columns and if there's space then add action that involves placing a piece in that column.
+        for j in 0..nj {
+            if self.board.get_ij(0, j) == 0 {
+                actions.push((self.player, j));
             }
         }
         // Return available actions if any.

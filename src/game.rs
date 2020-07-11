@@ -25,13 +25,14 @@ pub trait Game {
             let state = self.get_state();
             // Get valid actions.
             let actions = self.get_actions();
-            // Pick an action randomly.
+            // If no actions returned then end the game.
             if actions.len() == 0 {
                 break;
             };
+            // Choose a random action and apply to get rewards.
             let action = actions.choose(&mut rand::thread_rng()).unwrap();
-            let reward = self.act(action.to_owned());
-            data.push((state, action.to_owned(), reward));
+            let rewards = self.act(action.to_owned());
+            data.push((state, action.to_owned(), rewards));
         }
         // Backpropagate objective rewards back to the start of the game.
 
