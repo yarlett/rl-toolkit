@@ -51,12 +51,13 @@ impl Connect4 {
 }
 
 impl Game for Connect4 {
-    type Action = (usize, usize);  // (player, action)
-    type Reward = (usize, f32);    // (player, reward)
-    type State = Vec<usize>;       // board
+    type Action = (usize, usize); // (player, action)
+    type Reward = (usize, f32); // (player, reward)
+    type State = Vec<usize>; // board
 
-    fn act(&mut self, action: Self::Action) -> Option<Self::Reward> {
+    fn act(&mut self, action: Self::Action) -> Vec<Self::Reward> {
         let (player, column) = action;
+        let mut rewards = Vec::new();
         // Find the lowest empty point in the column.
         let mut i = 0;
         loop {
@@ -71,11 +72,12 @@ impl Game for Connect4 {
         self.board.put_ij(i, column, player);
         self.switch_players();
         // Determine reward.
+        let other_player = if player == 1 { 2 } else { 1 };
         if self.winning_point(i, column) {
-            return Some((player, 1.0));
-        } else {
-            return None;
+            rewards.push((player, 1.0));
+            rewards.push((other_player, -1.0));
         }
+        rewards
     }
 
     fn get_actions(&self) -> Option<Vec<Self::Action>> {
@@ -96,11 +98,13 @@ impl Game for Connect4 {
                 }
             }
             // If the highest piece in the column is part of a winning position then no actions are possible.
-            if (row < rows) {
-                if self.winning_point(row, col) { return None; }
+            if row < rows {
+                if self.winning_point(row, col) {
+                    return None;
+                }
             }
             // If the row of the highest piece is > 0 then there's room to move in the row above.
-            if (row > 0) {
+            if row > 0 {
                 actions.push((self.player, col));
             }
         }
@@ -114,18 +118,6 @@ impl Game for Connect4 {
     fn get_state(&self) -> Self::State {
         self.board.get_board()
     }
-
-    // fn coded_action(&self) -> Vec<f32> {
-    //     vec![0f32; self.board.get_j()]
-    // }
-    //
-    // fn coded_state(&self) -> Vec<f32> {
-    //     let mut vec = vec![0f32; self.board.len()];
-    //     for i in 0..self.board.len() {
-    //         vec[i] = self.board.get(i) as f32
-    //     }
-    //     vec
-    // }
 
     fn reset(&mut self) {
         self.board.reset();

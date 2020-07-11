@@ -6,7 +6,7 @@ pub trait Game {
     type State;
 
     // Apply action to update state and returns optional reward.
-    fn act(&mut self, _: Self::Action) -> Option<Self::Reward>;
+    fn act(&mut self, _: Self::Action) -> Vec<Self::Reward>;
     // Get actions that can be taken given the current state (returns None if no actions are possible and the game is finished).
     fn get_actions(&self) -> Option<Vec<Self::Action>>;
     // Returns the current state.
@@ -15,7 +15,7 @@ pub trait Game {
     fn reset(&mut self);
 
     // Starts a fresh game and performs Monte Carlo Tree Search (MCTS) under a random policy until the game terminates.
-    fn simulate(&mut self) -> Vec<(Self::State, Self::Action, Option<Self::Reward>)> {
+    fn simulate(&mut self) -> Vec<(Self::State, Self::Action, Vec<Self::Reward>)> {
         // Reset state.
         self.reset();
         // Collect (S, A, R) triples by making random moves until game is finished.
