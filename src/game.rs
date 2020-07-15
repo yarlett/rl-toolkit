@@ -40,3 +40,9 @@ pub trait Game {
         data
     }
 }
+
+// struct GameTurn {
+//     actions: Vec<Action>,
+//     state: State,
+//     rewards: Vec<Reward>,
+// }
