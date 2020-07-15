@@ -54,16 +54,13 @@ impl Connect4 {
 }
 
 impl Domain for Connect4 {
-    type Action = usize; // column
+    type Action = (usize, usize); // (player, column)
     type Agent = usize; // player
     type Reward = f32; // reward
     type State = Vec<usize>; // board state
 
-    fn act(
-        &mut self,
-        player: Self::Agent,
-        column: Self::Action,
-    ) -> Vec<(Self::Agent, Self::Reward)> {
+    fn act(&mut self, action: Self::Action) -> Vec<(Self::Agent, Self::Reward)> {
+        let (player, column) = action;
         let mut rewards = Vec::new();
         // Find the lowest empty point in the column.
         let mut i = 0;
@@ -87,7 +84,7 @@ impl Domain for Connect4 {
         rewards
     }
 
-    fn get_actions(&self) -> Vec<(Self::Agent, Self::Action)> {
+    fn get_actions(&self) -> Vec<Self::Action> {
         let mut actions = Vec::new();
         let ni = self.board.get_i();
         let nj = self.board.get_j();
@@ -109,8 +106,16 @@ impl Domain for Connect4 {
         actions
     }
 
+    fn get_agents(&self) -> Vec<Self::Agent> {
+        vec![1, 2]
+    }
+
     fn get_state(&self) -> Self::State {
         self.board.get_board()
+    }
+
+    fn reward_add(&self, r1: &Self::Reward, r2: &Self::Reward) -> Self::Reward {
+        r1 + r2
     }
 
     fn reset(&mut self) {
@@ -127,10 +132,13 @@ mod tests {
     #[test]
     fn simulate_test() {
         let mut game = Connect4::new();
-        let data = game.simulate();
-        for d in &data {
-            println!("{:?}", d);
+        let (data, rewards) = game.simulate();
+        for i in 0..data.len() {
+            println!("{:?} {:?}", data[i], rewards[i]);
         }
+        // for d in &data {
+        //     println!("{:?}", d);
+        // }
     }
 
     #[bench]
