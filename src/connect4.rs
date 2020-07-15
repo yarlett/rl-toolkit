@@ -1,6 +1,6 @@
 extern crate test;
 use crate::board::Board;
-use crate::game::Game;
+use crate::domain::Domain;
 
 #[derive(Clone)]
 pub struct Connect4 {
@@ -53,13 +53,17 @@ impl Connect4 {
     }
 }
 
-impl Game for Connect4 {
-    type Action = (usize, usize); // (player, column)
-    type Reward = (usize, f32); // (player, reward)
-    type State = Vec<usize>; // board
+impl Domain for Connect4 {
+    type Action = usize; // column
+    type Agent = usize; // player
+    type Reward = f32; // reward
+    type State = Vec<usize>; // board state
 
-    fn act(&mut self, action: Self::Action) -> Vec<Self::Reward> {
-        let (player, column) = action;
+    fn act(
+        &mut self,
+        player: Self::Agent,
+        column: Self::Action,
+    ) -> Vec<(Self::Agent, Self::Reward)> {
         let mut rewards = Vec::new();
         // Find the lowest empty point in the column.
         let mut i = 0;
@@ -83,7 +87,7 @@ impl Game for Connect4 {
         rewards
     }
 
-    fn get_actions(&self) -> Vec<Self::Action> {
+    fn get_actions(&self) -> Vec<(Self::Agent, Self::Action)> {
         let mut actions = Vec::new();
         let ni = self.board.get_i();
         let nj = self.board.get_j();

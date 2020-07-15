@@ -1,5 +1,5 @@
 use rltoolkit::connect4::Connect4;
-use rltoolkit::game::Game;
+use rltoolkit::domain::Domain;
 
 fn main() {
     let mut c4 = Connect4::new();
