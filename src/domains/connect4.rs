@@ -1,6 +1,6 @@
 extern crate test;
-use crate::board::Board;
 use crate::domain::Domain;
+use crate::domains::board::Board;
 
 #[derive(Clone)]
 pub struct Connect4 {
