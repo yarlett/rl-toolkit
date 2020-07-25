@@ -59,8 +59,8 @@ impl Board {
     pub fn new(i: usize, j: usize) -> Board {
         Board {
             board: vec![0; i * j],
-            i: i,
-            j: j,
+            i,
+            j,
         }
     }
 
