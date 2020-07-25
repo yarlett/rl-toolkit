@@ -36,18 +36,23 @@ impl Connect4 {
         if self.board.get_ij(i, j) == 0 {
             return false;
         };
-
-        if self.board.longest_col(i, j) >= 4 {
-            return true;
-        }
-        if self.board.longest_diag_1(i, j) >= 4 {
-            return true;
-        }
-        if self.board.longest_diag_2(i, j) >= 4 {
-            return true;
-        }
-        if self.board.longest_row(i, j) >= 4 {
-            return true;
+        for direction in &[
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ] {
+            if self
+                .board
+                .run_length(i as isize, j as isize, direction.0, direction.1)
+                >= 4
+            {
+                return true;
+            }
         }
         false
     }
@@ -136,9 +141,6 @@ mod tests {
         for i in 0..data.len() {
             println!("{:?} {:?}", data[i], rewards[i]);
         }
-        // for d in &data {
-        //     println!("{:?}", d);
-        // }
     }
 
     #[bench]

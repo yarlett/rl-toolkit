@@ -6,9 +6,9 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn get(&self, i: usize) -> usize {
-        self.board[i]
-    }
+    // pub fn get(&self, i: usize) -> usize {
+    //     self.board[i]
+    // }
 
     pub fn get_board(&self) -> Vec<usize> {
         self.board.clone()
@@ -26,146 +26,32 @@ impl Board {
         self.j
     }
 
-    pub fn len(&self) -> usize {
-        self.board.len()
-    }
+    // pub fn len(&self) -> usize {
+    //     self.board.len()
+    // }
 
-    pub fn longest_col(&self, i: usize, j: usize) -> usize {
+    pub fn run_length(&self, mut i: isize, mut j: isize, dir_i: isize, dir_j: isize) -> isize {
         // Get piece at current location.
-        let p = self.get_ij(i, j);
+        let p = self.get_ij(i as usize, j as usize);
         let mut n = 1;
-        // Search up.
-        let mut ii = i;
+        let max_i: isize = (self.get_i() - 1) as isize;
+        let max_j: isize = (self.get_j() - 1) as isize;
+        // Search in direction.
         loop {
-            if ii == 0 {
-                break;
-            };
-            if self.get_ij(ii - 1, j) == p {
-                n += 1;
-                ii -= 1;
-            } else {
+            let next_i = i + dir_i;
+            if (next_i < 0) || (next_i > max_i) {
                 break;
             }
-        }
-        // Search down.
-        let mut ii = i;
-        loop {
-            if ii == (self.get_i() - 1) {
-                break;
-            };
-            if self.get_ij(ii + 1, j) == p {
-                n += 1;
-                ii += 1;
-            } else {
+            let next_j = j + dir_j;
+            if (next_j < 0) || (next_j > max_j) {
                 break;
             }
-        }
-        n
-    }
-
-    pub fn longest_diag_1(&self, i: usize, j: usize) -> usize {
-        // Get piece at current location.
-        let p = self.get_ij(i, j);
-        let mut n = 1;
-        // Search --.
-        let mut ii = i;
-        let mut jj = j;
-        loop {
-            if (ii == 0) | (jj == 0) {
-                break;
-            };
-            if self.get_ij(ii - 1, jj - 1) == p {
-                n += 1;
-                ii -= 1;
-                jj -= 1;
-            } else {
+            if self.get_ij(next_i as usize, next_j as usize) != p {
                 break;
             }
-        }
-        // Search ++.
-        let mut ii = i;
-        let mut jj = j;
-        loop {
-            if (ii == (self.get_i() - 1)) | (jj == (self.get_j() - 1)) {
-                break;
-            };
-            if self.get_ij(ii + 1, jj + 1) == p {
-                n += 1;
-                ii += 1;
-                jj += 1
-            } else {
-                break;
-            }
-        }
-        n
-    }
-
-    pub fn longest_diag_2(&self, i: usize, j: usize) -> usize {
-        // Get piece at current location.
-        let p = self.get_ij(i, j);
-        let mut n = 1;
-        // Search +-.
-        let mut ii = i;
-        let mut jj = j;
-        loop {
-            if (ii == (self.get_i() - 1)) | (jj == 0) {
-                break;
-            };
-            if self.get_ij(ii + 1, jj - 1) == p {
-                n += 1;
-                ii += 1;
-                jj -= 1;
-            } else {
-                break;
-            }
-        }
-        // Search -+.
-        let mut ii = i;
-        let mut jj = j;
-        loop {
-            if (ii == 0) | (jj == (self.get_j() - 1)) {
-                break;
-            };
-            if self.get_ij(ii - 1, jj + 1) == p {
-                n += 1;
-                ii -= 1;
-                jj += 1
-            } else {
-                break;
-            }
-        }
-        n
-    }
-
-    pub fn longest_row(&self, i: usize, j: usize) -> usize {
-        // Get piece at current location.
-        let p = self.get_ij(i, j);
-        let mut n = 1;
-        // Search left.
-        let mut jj = j;
-        loop {
-            if jj == 0 {
-                break;
-            };
-            if self.get_ij(i, jj - 1) == p {
-                n += 1;
-                jj -= 1;
-            } else {
-                break;
-            }
-        }
-        // Search right.
-        let mut jj = j;
-        loop {
-            if jj == (self.get_j() - 1) {
-                break;
-            };
-            if self.get_ij(i, jj + 1) == p {
-                n += 1;
-                jj += 1;
-            } else {
-                break;
-            }
+            i += dir_i;
+            j += dir_j;
+            n += 1;
         }
         n
     }
